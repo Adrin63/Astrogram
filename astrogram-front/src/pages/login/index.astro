@@ -1,0 +1,66 @@
+---
+import Layout from "../../layouts/Layout.astro"
+
+const API_URL = 'http://localhost:3000';
+let usuarios = [];
+
+async function getUsers() {
+    try {
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        return await response.json();
+      } else {
+        const errorData = await response.json();
+        console.error(errorData);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      return null;
+    }
+}
+
+usuarios = await getUsers();
+console.log("hay" + usuarios);
+---
+
+<Layout title="Login">
+    <div class="h-screen justify-between m-auto rounded-lg p-4 flex flex-col items-center">
+		<div>{usuarios?.length > 0 ? usuarios[1].name : "non"}</div>
+        <form method="post" class="flex flex-col justify-center w-2/3">
+			<div class="text-3xl text-center p-2 mb-6">
+				<p>Astrogram</p>
+			</div>
+			<div class="mb-6">
+				<input
+					class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700"
+					name="nom"
+					type="text"
+					placeholder="Usuario"
+				/>
+			</div>
+            <div class="mb-6">
+                <div>
+                    <input
+                        class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700"
+                        name="password"
+                        type="text"
+						placeholder="Contraseña"
+                    />
+                </div>
+            </div>
+        <button class="mt-5 bg-blue-500 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded italic">
+            Login
+        </button>
+        </form> 
+		<div class="flex justify-bottom">
+			<p class="mr-1">No tienes cuenta?</p><a class="text-blue-500 underline">Registrate aqui!</a>
+		</div>
+    </div>
+</Layout>

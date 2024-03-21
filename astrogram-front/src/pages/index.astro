@@ -1,0 +1,18 @@
+---
+import Layout from "../layouts/Layout.astro"
+
+
+let actualUser;
+
+if(Astro.cookies.has("user")){
+	actualUser = Astro.cookies.get("user").value;
+}
+else{
+	return Astro.redirect('/login');
+}
+
+---
+
+<Layout title="Home">
+    
+</Layout>
