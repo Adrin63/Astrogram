@@ -1,18 +1,54 @@
 ---
 import Layout from "../layouts/Layout.astro"
+import IndividualPost from "../components/IndividualPost.astro"
 
+const API_URL = 'http://localhost:3000';
 
-let actualUser;
+let actualUser = "";
 
-if(Astro.cookies.has("user")){
-	actualUser = Astro.cookies.get("user").value;
-}
-else{
+if(!Astro.cookies.has("token")){
 	return Astro.redirect('/login');
 }
+else{
+	const options = {
+    method: "POST",
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({token: Astro.cookies.get("token").value})
+  }
 
+  try{
+    let response = await fetch(API_URL + '/api/actualUser', options);
+
+    response = await response.json();
+
+		actualUser = response.user[0];
+		console.log("Esto es el get:", actualUser);
+
+  } catch(error) {
+    console.log('Error: ', error)
+  }
+}
+
+
+let posts = [{user: "Adrin", tags: ["nerdge", "cat"], img: 'images/a.jpg'},
+{user: "Nat", tags: ["bloc"], img: 'images/notepad.png'},
+{user: "Pawla", tags: ["pun", "pun", "oyasumi"], img: 'images/punpun.png'}];
+
+//{lastPosts.map(obj => <IndividualPost data={obj}/>)}
 ---
 
 <Layout title="Home">
-    
+	<div class="flex flex-row justify-between p-3 items-center bg-slate-400 sticky left-0 top-0">
+		<img src="images/logo.png" href="/" class="w-16"/>
+		<h2 class="text-4xl font-semibold">Astrogram</h2>
+		<h2 class="text-3xl italic text-end">{actualUser.name}</h2>
+	</div>
+  <div>
+    <!-- <IndividualPost user="Adrin" tags= {} />
+    <IndividualPost user="Nat" tags= {["bloc"]} img={'images/notepad.png'}/>
+    <IndividualPost user="Pancho" tags= {["pun", "pun", "oyasumi"]} img={'images/punpun.png'}/> -->
+    {posts.map(p => <IndividualPost user={p.user} tags={p.tags} img={p.img}/>)}
+  </div>
 </Layout>

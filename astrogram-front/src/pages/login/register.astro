@@ -2,12 +2,8 @@
 import Layout from "../../layouts/Layout.astro"
 
 const API_URL = 'http://localhost:3000';
-let usuarios = [];
-let statusString = "";
 
-if(Astro.cookies.has("token")){
-	return Astro.redirect('/');
-}
+let statusString = "";
 
 if (Astro.request.method === "POST") {
   const data = await Astro.request.formData();
@@ -23,7 +19,7 @@ if (Astro.request.method === "POST") {
   }
 
   try{
-    let response = await fetch(API_URL + '/api/login', options);
+    let response = await fetch(API_URL + '/api/register', options);
 
     response = await response.json();
 
@@ -36,9 +32,10 @@ if (Astro.request.method === "POST") {
     }
     else
     {
-      statusString="Error al loguearse, pruebe de nuevo.";
+      statusString="Error al registrarse, pruebe de nuevo.";
       console.log(response);
     }
+
   } catch(error) {
     console.log('Error', error)
   }
@@ -48,9 +45,8 @@ if (Astro.request.method === "POST") {
 
 <Layout title="Login">
     <div class="h-screen justify-between m-auto rounded-lg p-4 flex flex-col items-center">
-		  <!-- <div>{usuarios?.length > 0 ? usuarios[1].name : "non"}</div> -->
       <div/>
-        <form method="post" class="flex flex-col justify-center w-2/3">
+      <form method="post" class="flex flex-col justify-center w-2/3">   
 			<div class="text-3xl text-center p-2 mb-6">
 				<p>Astrogram</p>
 			</div>
@@ -62,23 +58,24 @@ if (Astro.request.method === "POST") {
 					placeholder="Usuario"
 				/>
 			</div>
-            <div class="mb-6">
-                <div>
-                    <input
-                        class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700"
-                        name="password"
-                        type="text"
-						placeholder="Contraseña"
-                    />
-                </div>
-            </div>
-            <p class="text-red-500 italic text-center">{statusString}</p>
+          <div class="mb-6">
+              <div>
+                  <input
+                      class="bg-gray-200 appearance-none border-2 border-gray-200 rounded w-full py-2 px-4 text-gray-700"
+                      name="password"
+                      type="text"
+          placeholder="Contraseña"
+                  />
+              </div>
+          </div>
+          
+        <p class="text-red-500 italic text-center">{statusString}</p>
         <button class="mt-5 bg-blue-500 hover:bg-blue-700 text-white text-center font-bold py-2 px-4 rounded">
-            Iniciar Sesión
+            Crear Cuenta
         </button>
         </form> 
 		<div class="flex justify-bottom">
-			<p class="mr-1">¿No tienes cuenta?</p><a class="text-blue-500 underline" href="/login/register">Registrate aqui!</a>
+			<p class="mr-1">¿Ya tienes cuenta?</p><a class="text-blue-500 underline" href="/">Inicia sesión</a>
 		</div>
     </div>
 </Layout>

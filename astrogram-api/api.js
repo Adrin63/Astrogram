@@ -7,7 +7,7 @@ const fs = require('fs'); // file i/o
 const sharp = require('sharp'); // image editing
 const jwt = require('jsonwebtoken'); // Importa la llibreria jsonwebtoken per a generar i verificar JWT
 
-const SECRET_KEY = "vols-que-et-punxi-amb-un-punxo"; // to be used in jsonwebtoken creation
+const SECRET_KEY = "galleta-galleta-metralleta"; // to be used in jsonwebtoken creation
 
 const app = express();
 app.use(express.json());
@@ -43,9 +43,9 @@ function writeUImages(data) {
 
 // Middleware per verificar el JWT en la cookie
 const checkToken = (req, res, next) => {
-    const token = req.cookies?.token; // Obté el token des de la cookie de la petició
+    const token = req.body.token; // Obté el token des de la cookie de la petició
     if (!token) {
-        return res.status(401).json({ error: 'Unauthorized' }); // Retorna error 401 si no hi ha cap token
+        return res.status(401).json({ error: 'No hay token' }); // Retorna error 401 si no hi ha cap token
     }
     try {
         const decodedToken = jwt.verify(token, SECRET_KEY); // Verifica el token utilitzant la clau secreta
@@ -70,9 +70,8 @@ app.post('/api/login', (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id, userName: user.name }, SECRET_KEY, { expiresIn: '2h' }); // Genera un token JWT vàlid durant 2 hores
-    res.cookie('token', token, { httpOnly: false, maxAge: 7200000 }); // Estableix el token com una cookie
 
-    res.json({ message: 'Login successful', userId: user.id, name: user.name });
+    res.json({ok : true, message: 'Login hecho', userId: user.id, name: user.name, token });
 });
 
 
@@ -103,14 +102,16 @@ app.post('/api/register', (req, res) => {
     const newUser = { id, name, password: bcrypt.hashSync(password, 8) };
     users.push(newUser);
     writeUsers(users);
-    res.json({ message: 'User registered successfully' });
+
+    const token = jwt.sign({ userId: newUser.id, userName: newUser.name }, SECRET_KEY, { expiresIn: '2h' }); // Genera un token JWT vàlid durant 2 hores
+    res.json({ok : true, message: 'Registrado correctamente', token: token });
 });
 
 
 // Configuració de multer per gestionar la pujada de fitxers
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'tmp') // Especifica la carpeta de destinació dels fitxers pujats
+        cb(null, 'images') // Especifica la carpeta de destinació dels fitxers pujats
     },
     filename: function (req, file, cb) {
         cb(null, `${Date.now()}_${file.originalname}`) // Assigna un nom únic als fitxers pujats
@@ -120,28 +121,29 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage }); // Configura multer per a gestionar la pujada d'un únic fitxer amb el camp 'foto'
 
 // Funció per pujar una imatge amb hashtags
-app.post('/api/upload', checkToken, upload.single('image'), async (req, res) => {
-    const { userId, hashtags } = req.body;
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+    const { username, hashtags } = req.body;
+    const date = new Date();
     const image = req.file;
 
-    // Redimensionar la imatge abans de desar-la
-    try {
-        await sharp(image.path)
-            .resize({ width: 800 })
-            .toFile(`${imagesFolder}/${image.filename}`)
-            .then(async () => {
-                // Eliminar la imatge original després de redimensionar-la i desar-la
-                await fs.unlink(image.path, (err)=>err?console.log(err):()=>{});
-            });
+    // // Redimensionar la imatge abans de desar-la
+    // try {
+    //     await sharp(image.path)
+    //         .resize({ width: 800 })
+    //         .toFile(`${imagesFolder}/${image.filename}`)
+    //         .then(async () => {
+    //             // Eliminar la imatge original després de redimensionar-la i desar-la
+    //             await fs.unlink(image.path, (err)=>err?console.log(err):()=>{});
+    //         });
 
-    } catch (error) {
-        //throw error
-        return res.status(500).json({ error: 'Failed to process image xx' });
-    }
+    // } catch (error) {
+    //     //throw error
+    //     return res.status(500).json({ error: 'Failed to process image xx' });
+    // }
 
     // Guardar la informació de la imatge al fitxer images.json
     const images = readImages();
-    images.push({ userId: req.userId, filename: image.filename, hashtags });
+    images.push({ userId: req.userId, filename: image.filename, hashtags, username, date });
     fs.writeFileSync(imagesFile, JSON.stringify(images, null, 2));
 
     res.json({ message: 'Image uploaded successfully' });
@@ -152,7 +154,15 @@ app.get('/api/users', (req, res) => {
     res.json(readUsers());
 });
 
+app.post('/api/actualUser', checkToken, (req, res) => {
+    const userId = req.userId;
+    const user = readUsers().filter(u => u.id === userId);
 
+    if(user == null)
+        return res.status(404).json({ error: 'El usuario no existe' });
+
+    res.json({user})
+})
 
 // Endpoint per obtenir les imatges d'un usuari
 app.get('/api/images', checkToken, (req, res) => {
