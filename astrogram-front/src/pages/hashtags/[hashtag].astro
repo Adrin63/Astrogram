@@ -1,0 +1,46 @@
+---
+import CreatePost from "../../components/CreatePost.astro";
+import Header from "../../components/Header.astro";
+import IndividualPost from "../../components/IndividualPost.astro";
+import Layout from "../../layouts/Layout.astro";
+
+let posts =[];
+
+const API_URL = 'https://ricardhernandez.com';
+
+const {hashtag} = Astro.params;
+
+if(!Astro.cookies.has("token")){
+	return Astro.redirect('/login');
+}
+
+
+  let token = Astro.cookies.get("token").value;
+
+	const options = {
+    method: "GET",
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    }
+  }
+
+  try{
+  let resp = await fetch(API_URL + '/api/images/hashtag/' + hashtag, options);
+  posts = await resp.json()
+  console.log("Posts por hasthag pedidos.")
+
+  }catch(error){
+    console.log('Error: ', error)
+}
+
+---
+
+<Layout = {hashtag}>
+    <Header/>
+    <div>
+      {posts.length > 0 ? posts.map(p => <IndividualPost user={p.userName} tags={p.hashtags} img={p.image}/>)
+      : ''}
+    </div>
+    <CreatePost/>
+</Layout>

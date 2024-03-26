@@ -1,13 +1,17 @@
 ---
 const {user, tags, img} = Astro.props;
+
+function replaceHashtagsWithLinks(text) {
+    return text.replace(/#(\w+)/g, '<a href="/hashtags/$1">#$1</a>');
+}
 ---
 
 <div>
-<img class="w-screen max-h-64 object-contain bg-emerald-200" src={'https://ricardhernandez.com/img/' + img}/>
-<div class="flex flew-row justify-between p-3 bg-emerald-400">
-    <h1 class="text-2xl font-semibold">{user}</h1>
-    <div class="flex flew-row font-semibold items-center">
-        <h3 class="mr-1">{tags}</h3>
-    </div> 
-</div>
+    <img class="w-screen max-h-64 object-contain bg-emerald-200" src={'https://ricardhernandez.com/img/' + img}/>
+    <div class="flex flew-row justify-between p-3 bg-emerald-400">
+        <a href={'/users/' + user}><h1 class="text-2xl font-semibold">{user}</h1></a>
+        <div class="flex flew-row font-semibold items-center">
+            <h3><Fragment set:html={replaceHashtagsWithLinks(tags)} /></h3>
+        </div> 
+    </div>
 </div>

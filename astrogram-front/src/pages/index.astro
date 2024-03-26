@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro"
 import IndividualPost from "../components/IndividualPost.astro"
 import Header from "../components/Header.astro";
+import CreatePost from "../components/CreatePost.astro";
 
 const API_URL = 'https://ricardhernandez.com';
 
@@ -26,7 +27,7 @@ if(!Astro.cookies.has("token")){
   let resp = await fetch(API_URL + '/api/allimages', options);
   posts = await resp.json()
   console.log("Imagenes solicitadas.")
-  
+
   }catch(error){
     console.log('Error: ', error)
   }
@@ -35,12 +36,6 @@ if(!Astro.cookies.has("token")){
 // let posts = [{userName: "Adrin", tags: ["nerdge", "cat"], img: 'images/a.jpg'},
 // {userName: "Nat", tags: ["bloc"], img: '/images/notepad.png'},
 // {userName: "Pawla", tags: ["pun", "pun", "oyasumi"], img: '/images/punpun.png'}];
-
-
-async function updateView(){
-    
-}
-
 ---
 
 <Layout title="Home">
@@ -49,9 +44,5 @@ async function updateView(){
     {posts.length > 0 ? posts.map(p => <IndividualPost user={p.userName} tags={p.hashtags} img={p.image}/>)
     : ''}
   </div>
-  <a href="/newPost">
-    <div class="flex sticky bottom-0 justify-center bg-emerald-600">
-      <h1 class="text-3xl mb-1 font-bold">+</h1>
-    </div>
-  </a>
+  <CreatePost/>
 </Layout>
