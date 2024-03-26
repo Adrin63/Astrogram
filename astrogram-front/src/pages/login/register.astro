@@ -1,7 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro"
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://ricardhernandez.com';
 
 let statusString = "";
 
@@ -23,22 +23,26 @@ if (Astro.request.method === "POST") {
 
     response = await response.json();
 
-    if(response.ok){
+    console.log(response);
+    if(response.message != null){
       console.log(response.message);
+
       Astro.cookies.set("token", response.token, { path: '/' });
       
       statusString = "";
       return Astro.redirect('/');
     }
-    else
-    {
-      statusString="Error al registrarse, pruebe de nuevo.";
-      console.log(response);
+    else{
+    console.log('Eu ta fasendo un error: ', response)
     }
-
   } catch(error) {
-    console.log('Error', error)
+    console.log('Error: ', error)
+    statusString="Error al registrarse, pruebe de nuevo.";
   }
+}
+
+const logout = () => {
+
 }
 
 ---
